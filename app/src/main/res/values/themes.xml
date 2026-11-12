@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      API 26 基线。windowLayoutInDisplayCutoutMode 与 windowLightNavigationBar
+      都是 API 27 才有的属性，放在这里 lint 会直接报 NewApi（厂商 ROM 上还可能
+      出现属性 id 冲突），因此它们被拆到 values-v27/themes.xml。
+    -->
+    <style name="Theme.Velune" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowBackground">@color/velune_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

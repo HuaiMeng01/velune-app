@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 模型请求与连接探针必需；缺失会直接报 "Permission denied (missing INTERNET permission?)" -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- 日历读写：Agent 创建/查询日程时按需申请 -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <!-- Android 13+ 通知需要运行时权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      Android 16 Live Updates（实时动态）：非运行时权限，安装即授予。
+      没有它，即使通知满足全部条件（ongoing + 请求提升 + 合法样式），
+      系统也不会把它提升为锁屏/通知栏顶部/状态栏 chip 的实时卡片。
+      只对「请求提升」的通知生效，普通通知不受影响。
+    -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+
+    <!-- 前台服务：QQ 机器人需要一条常驻连接 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- 读短信：仅在用户明确要求「看最近短信/找验证码」时按需申请 -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+
+    <!--
+      READ_SMS 会让 Google Play 推断「本应用必须有电话硬件」，从而把 Chromebook、
+      平板等设备直接过滤掉。这里显式声明为非必需，恢复大屏与无电话设备的可见性。
+    -->
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
+    <!--
+      包可见性（Android 11+）：只声明「能看到有桌面入口的应用」。
+      不用 QUERY_ALL_PACKAGES —— 那是能看到全部包（含系统服务）的重权限，
+      而 list_apps 只需要列出用户能点开的应用。
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".VeluneApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="Velune"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Velune">
+
+        <!-- 沙箱文件通过 FileProvider 分享，避免暴露 file:// 路径 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!--
+          设备管理员：只为 lock_screen 提供 DevicePolicyManager.lockNow() 权限。
+          策略文件仅声明 force-lock；激活必须用户在系统弹窗确认，代码无法绕过。
+        -->
+        <receiver
+            android:name="com.veluneagent.app.VeluneDeviceAdmin"
+            android:description="@string/device_admin_description"
+            android:exported="true"
+            android:label="@string/device_admin_label"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 待办闹钟：到点发本地通知。
+             exported=false：只有本应用自己的 PendingIntent 能触发，其他应用无法伪造提醒。 -->
+        <receiver
+            android:name="com.veluneagent.core.data.system.TodoAlarmReceiver"
+            android:exported="false" />
+
+        <!-- QQ 机器人常驻连接：后台 WebSocket 必须挂前台服务，否则会被系统回收 -->
+        <service
+            android:name=".QqBridgeService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

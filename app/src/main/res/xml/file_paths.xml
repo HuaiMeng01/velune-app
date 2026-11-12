@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Agent 沙箱目录：filesDir/sandbox 下的文件可以通过 FileProvider 分享/预览 -->
+    <files-path name="sandbox" path="sandbox/" />
+</paths>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  只申请 force-lock：锁屏用。
+  不要加 wipe-data / reset-password / force-password，这些权限对「锁屏」这一件事没有帮助，
+  只会放大误用后的后果。
+-->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <force-lock />
+    </uses-policies>
+</device-admin>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 设备管理员在系统设置里的显示名与说明（用户激活时看到的就是这两句） -->
+    <string name="device_admin_label">Velune 锁屏服务</string>
+    <string name="device_admin_description">仅用于执行「锁屏」指令，不会清除数据或修改密码。</string>
+</resources>
